@@ -3,12 +3,12 @@ package socketmode
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"reflect"
 	"testing"
 
+	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -227,17 +227,48 @@ func TestEventParsing(t *testing.T) {
 					EventID:      "Ev01JZ2T7S3U",
 					EventTime:    1610927831,
 					EventContext: "1-app_mention-redacted-redacted",
+					Authorizations: []slack.EventAuthorization{
+						{
+							TeamID:              "redacted",
+							UserID:              "redacted",
+							IsBot:               true,
+							IsEnterpriseInstall: false,
+						},
+					},
 				},
 				InnerEvent: slackevents.EventsAPIInnerEvent{
-					Type: slackevents.AppMention,
+					Type: string(slackevents.AppMention),
 					Data: &slackevents.AppMentionEvent{
-						Type:            slackevents.AppMention,
+						Type:            string(slackevents.AppMention),
 						User:            "redacted",
 						Text:            "<@U01JKSB8T7Y> test",
 						TimeStamp:       "1610927831.000200",
 						ThreadTimeStamp: "",
 						Channel:         "redacted",
-						EventTimeStamp:  json.Number("1610927831.000200"),
+						EventTimeStamp:  "1610927831.000200",
+						Blocks: slack.Blocks{
+							BlockSet: []slack.Block{
+								&slack.RichTextBlock{
+									Type:    slack.MBTRichText,
+									BlockID: "2Le",
+									Elements: []slack.RichTextElement{
+										&slack.RichTextSection{
+											Type: slack.RTESection,
+											Elements: []slack.RichTextSectionElement{
+												&slack.RichTextSectionUserElement{
+													Type:   slack.RTSEUser,
+													UserID: "redacted",
+												},
+												&slack.RichTextSectionTextElement{
+													Type: slack.RTSEText,
+													Text: " test39",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -252,7 +283,7 @@ func TestEventParsing(t *testing.T) {
 		})
 }
 
-func testParsing(t *testing.T, raw string, want interface{}) {
+func testParsing(t *testing.T, raw string, want any) {
 	t.Helper()
 
 	got, err := parse(raw)
@@ -265,7 +296,7 @@ func testParsing(t *testing.T, raw string, want interface{}) {
 	}
 }
 
-func dump(t *testing.T, data interface{}) string {
+func dump(t *testing.T, data any) string {
 	t.Helper()
 
 	var buf bytes.Buffer

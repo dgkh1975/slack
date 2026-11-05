@@ -28,3 +28,9 @@ func TestEscapeMessage(t *testing.T) {
 	test("A < B", "A &lt; B")
 	test("A > B", "A &gt; B")
 }
+
+func BenchmarkEscapeMessage(b *testing.B) {
+	for b.Loop() {
+		EscapeMessage("A & B")
+	}
+}

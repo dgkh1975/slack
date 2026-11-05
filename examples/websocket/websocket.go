@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -9,8 +10,23 @@ import (
 )
 
 func main() {
+	channelID := flag.String("channel", "", "Channel ID (required)")
+	flag.Parse()
+
+	// Get token from environment variable
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+
+	// Get channel ID from flag
+	if *channelID == "" {
+		fmt.Println("Channel ID is required: use -channel flag")
+		os.Exit(1)
+	}
 	api := slack.New(
-		"YOUR TOKEN HERE",
+		token,
 		slack.OptionDebug(true),
 		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)),
 	)
@@ -27,8 +43,8 @@ func main() {
 		case *slack.ConnectedEvent:
 			fmt.Println("Infos:", ev.Info)
 			fmt.Println("Connection counter:", ev.ConnectionCount)
-			// Replace C2147483705 with your Channel ID
-			rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C2147483705"))
+			// Send message to provided channel ID
+			rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", *channelID))
 
 		case *slack.MessageEvent:
 			fmt.Printf("Message: %v\n", ev)

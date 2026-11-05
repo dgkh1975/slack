@@ -17,7 +17,7 @@ type AttachmentAction struct {
 	Name            string                        `json:"name"`                       // Required.
 	Text            string                        `json:"text"`                       // Required.
 	Style           string                        `json:"style,omitempty"`            // Optional. Allowed values: "default", "primary", "danger".
-	Type            actionType                    `json:"type"`                       // Required. Must be set to "button" or "select".
+	Type            ActionType                    `json:"type"`                       // Required. Must be set to "button" or "select".
 	Value           string                        `json:"value,omitempty"`            // Optional.
 	DataSource      string                        `json:"data_source,omitempty"`      // Optional.
 	MinQueryLength  int                           `json:"min_query_length,omitempty"` // Optional. Default value is 1.
@@ -29,7 +29,7 @@ type AttachmentAction struct {
 }
 
 // actionType returns the type of the action
-func (a AttachmentAction) actionType() actionType {
+func (a AttachmentAction) actionType() ActionType {
 	return a.Type
 }
 
@@ -47,7 +47,8 @@ type AttachmentActionOptionGroup struct {
 }
 
 // AttachmentActionCallback is sent from Slack when a user clicks a button in an interactive message (aka AttachmentAction)
-// DEPRECATED: use InteractionCallback
+//
+// Deprecated: use InteractionCallback
 type AttachmentActionCallback InteractionCallback
 
 // ConfirmationField are used to ask users to confirm actions
@@ -60,8 +61,9 @@ type ConfirmationField struct {
 
 // Attachment contains all the information for an attachment
 type Attachment struct {
-	Color    string `json:"color,omitempty"`
-	Fallback string `json:"fallback,omitempty"`
+	Color     string `json:"color,omitempty"`
+	HideColor bool   `json:"hide_color,omitempty"`
+	Fallback  string `json:"fallback,omitempty"`
 
 	CallbackID string `json:"callback_id,omitempty"`
 	ID         int    `json:"id,omitempty"`
@@ -77,8 +79,22 @@ type Attachment struct {
 	Pretext   string `json:"pretext,omitempty"`
 	Text      string `json:"text,omitempty"`
 
-	ImageURL string `json:"image_url,omitempty"`
-	ThumbURL string `json:"thumb_url,omitempty"`
+	ImageURL    string `json:"image_url,omitempty"`
+	ImageBytes  int    `json:"image_bytes,omitempty"`
+	ImageHeight int    `json:"image_height,omitempty"`
+	ImageWidth  int    `json:"image_width,omitempty"`
+	ThumbURL    string `json:"thumb_url,omitempty"`
+
+	ServiceName string `json:"service_name,omitempty"`
+	ServiceIcon string `json:"service_icon,omitempty"`
+	FromURL     string `json:"from_url,omitempty"`
+	OriginalURL string `json:"original_url,omitempty"`
+
+	// IsShare is set on the attachment Slack adds to a forwarded message, and
+	// Files holds the forwarded message's files.
+	IsShare     bool   `json:"is_share,omitempty"`
+	IsMsgUnfurl bool   `json:"is_msg_unfurl,omitempty"`
+	Files       []File `json:"files,omitempty"`
 
 	Fields     []AttachmentField  `json:"fields,omitempty"`
 	Actions    []AttachmentAction `json:"actions,omitempty"`
